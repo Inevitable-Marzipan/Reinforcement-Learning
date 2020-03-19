@@ -14,7 +14,9 @@ class KArmedBandit:
         self.actual_reward_values = NormalDist(mu=reward_mean, sigma=reward_std).samples(arms)
         self.reward_distributions = \
             [NormalDist(mu=actual_reward_value, sigma=sigma) for actual_reward_value in self.actual_reward_values]
+        
         self.action_space = [x for x in range(self.arms)]
+        self.optimal_action = max(zip(self.actual_reward_values, range(len(self.actual_reward_values))))[1]
     
     def step(self, action):
         assert action in self.action_space,  f"invalid action {action}, type: {type(action)}"
