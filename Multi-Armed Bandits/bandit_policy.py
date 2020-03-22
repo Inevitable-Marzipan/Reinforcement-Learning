@@ -3,11 +3,13 @@ import numpy as np
 
 class BanditPolicy():
 
-    def __init__(self, action_space, epsilon):
+    def __init__(self, action_space, epsilon, initial_value=0, step_size=None):
         self.action_space = action_space
         self.epsilon = epsilon
-        self.q_estimation = {action: 0 for action in action_space}
-        self.n = {action: 0 for action in action_space}
+        self.step_size = step_size
+        self.initial_value = initial_value
+        self.q_estimation = {action: self.initial_value for action in self.action_space}
+        self.n = {action: 0 for action in self.action_space}
 
     def act(self):
         if np.random.random() > (1 - self.epsilon):
@@ -21,10 +23,15 @@ class BanditPolicy():
                 return max_actions[np.random.randint(0, len(max_actions) - 1)]
         
     def update_policy(self, action, reward):
+        assert action in self.action_space,  f"invalid action {action}, type: {type(action)}"
         self.n[action] += 1
         current_estimation = self.q_estimation[action]
-        self.q_estimation[action] = current_estimation + \
-                                    (1 / self.n[action]) * (reward - current_estimation)
+        if self.step_size is not None:
+            self.q_estimation[action] = current_estimation + \
+                                        self.step_size * (reward - current_estimation)
+        else:
+            self.q_estimation[action] = current_estimation + \
+                                        (1 / self.n[action]) * (reward - current_estimation)
     
     @staticmethod
     def _allmax(a, key=lambda x: x):
@@ -39,7 +46,7 @@ class BanditPolicy():
             elif key(a[i]) == max_:
                 all_.append(i)
         return all_
-
     
-
-
+    def reset(self):
+        self.q_estimation = {action: self.initial_value for action in self.action_space}
+        self.n = {action: 0 for action in self.action_space}
