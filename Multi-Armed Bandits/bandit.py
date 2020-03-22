@@ -20,5 +20,5 @@ class KArmedBandit:
     
     def step(self, action):
         assert action in self.action_space,  f"invalid action {action}, type: {type(action)}"
-        return self.reward_distributions[action].samples(1)
+        return self.reward_distributions[action].samples(1)[0]
 
